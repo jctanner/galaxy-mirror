@@ -3,6 +3,7 @@
 from flask import jsonify
 from flask import Flask
 from flask import redirect
+from flask import request
 
 import requests
 import requests_cache
@@ -30,6 +31,10 @@ def api_root():
 @app.route('/api/<path:api_path>')
 def api_abstract_path(api_path):
     this_url = BASEURL + '/api/' + api_path
+    if request.args:
+        this_url += '?'
+        for k,v in dict(request.args).items():
+            this_url += f'{k}={v}'
     print(f'GET {this_url}')
     rr = requests.get(this_url)
     return jsonify(rr.json())
