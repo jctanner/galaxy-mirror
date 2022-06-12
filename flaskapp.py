@@ -21,7 +21,9 @@ def root():
 
 @app.route('/api/')
 def api_root():
-    rr = requests.get(BASEURL + '/api/')
+    this_url = BASEURL + '/api/'
+    print(f'GET {this_url}')
+    rr = requests.get(this_url)
     return jsonify(rr.json())
 
 
