@@ -8,22 +8,24 @@ from flask import jsonify
 from flask import Flask
 from flask import redirect
 from flask import request
+from flask import Response
 
 import requests
-#import requests_cache
 
 
 app = Flask(__name__)
 
 BASEURL = 'https://galaxy.ansible.com'
 CACHEDIR = '/data'
-#requests_cache.install_cache('/data/demo_cache')
 
 
 def get_cached_url(url):
     ho = hashlib.sha256(url.encode('utf-8'))
     hd = ho.hexdigest()
-    cf = f'{CACHEDIR}/{hd}.json'
+    _cd = os.path.join(CACHEDIR, hd[:3])
+    if not os.path.exists(_cd):
+        os.makedirs(_cd)
+    cf = f'{_cd}/{hd}.json'
 
     if not os.path.exists(CACHEDIR):
         os.makedirs(CACHEDIR)
@@ -32,15 +34,28 @@ def get_cached_url(url):
         app.logger.info(f'CACHE MISS {url}')
 
         rr = requests.get(url)
-        ds = rr.json()
-        with open(cf, 'w') as f:
-            f.write(json.dumps({'url': url, 'data': ds}, indent=2))
+        mimetype = 'application/json'
+        try:
+            ds = rr.json()
+        except Exception as e:
+            mimetype = 'applicaiton/text'
 
-        return ds
+        with open(cf, 'w') as f:
+            f.write(json.dumps({
+                'headers': dict(rr.headers),
+                'status_code': rr.status_code,
+                'mimetype': mimetype,
+                'text': rr.text,
+                'url': url,
+                #'data': ds
+            }, indent=2))
+
+        return Response(rr.text, status=rr.status_code, mimetype='application/json')
 
     app.logger.info(f'CACHE HIT {url}')
     with open(cf, 'r') as f:
-        return json.loads(f.read())['data']
+        ds = json.loads(f.read())
+    return Response(ds['text'], status=ds['status_code'], mimetype=ds['mimetype'])
 
 
 @app.route('/')
@@ -51,10 +66,10 @@ def root():
 @app.route('/api/')
 def api_root():
     this_url = BASEURL + '/api/'
-    #print(f'GET {this_url}')
-    #rr = requests.get(this_url)
-    #return jsonify(rr.json())
     return get_cached_url(this_url)
+    if ds:
+        return jsonify(ds), code
+    return text, code
 
 
 @app.route('/api/<path:api_path>')
@@ -62,12 +77,12 @@ def api_abstract_path(api_path):
     this_url = BASEURL + '/api/' + api_path
     if request.args:
         this_url += '?'
-        for k,v in dict(request.args).items():
+        keys = sorted(list(dict(request.args).keys()))
+        for k in keys:
+            v= dict(request.args)[k]
             this_url += f'{k}={v}'
-    #print(f'GET {this_url}')
-    #rr = requests.get(this_url)
-    #return jsonify(rr.json())
     return get_cached_url(this_url)
+
 
 
 if __name__ == "__main__":
