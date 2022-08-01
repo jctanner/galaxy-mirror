@@ -1,3 +1,4 @@
 Flask
 requests
 requests_cache
+logzero
