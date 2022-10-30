@@ -131,3 +131,4 @@ dmypy.json
 
 .cache/*
 cache*
+.vagrant
