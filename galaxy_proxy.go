@@ -31,6 +31,17 @@ type GalaxyResponse struct {
 }
 
 
+func get_cache_dir() string {
+    fallback := ".cache"
+    value := os.Getenv("GALAXY_PROXY_CACHE")
+    if len(value) == 0 {
+        return fallback
+    }
+    return value
+}
+var cache_dir = get_cache_dir()
+
+
 func hash(s string) string{
     // make a hexified sha56sum from a string
     hasher := sha256.New()
@@ -76,7 +87,7 @@ func get_upstream_url(url_path string, query_params url.Values) GalaxyResponse {
     fprefix := fhash[0:3]
 
     // define the cache filename ...
-    fdir := ".cache/" + fprefix
+    fdir := cache_dir + "/" + fprefix
     fname := fdir + "/" + fhash + ".json"
 
     // make cache directory if not exists ...
