@@ -149,7 +149,7 @@ func (g *GalaxyProxy) Api(c *gin.Context) {
 		"available_versions": gin.H{
 			"v1": "v1/",
 			"v2": "v2/",
-			"v3": "v3/",
+			//"v3": "v3/",
 		},
 		"current_version": "v1",
 		"description": "Galaxy Proxy",
