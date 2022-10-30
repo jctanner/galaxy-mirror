@@ -111,8 +111,8 @@ def crawl_roles():
 
 def main():
 
-    #crawl_roles()
     crawl_collections()
+    crawl_roles()
     import epdb; epdb.st()
 
 
