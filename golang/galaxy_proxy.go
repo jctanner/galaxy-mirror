@@ -1,3 +1,12 @@
+/*
+galaxy_proxy.go
+
+A simple/naive reverse proxy for galaxy.ansible.com with on-disk caching of requests.
+
+On-disk cache is permanent, so it will always be behind the upstream source once cached.
+The easiest way to invalidate the cache is to wipe out the cachedir or restart the container.
+*/
+
 package main
 
 import (
