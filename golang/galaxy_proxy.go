@@ -78,7 +78,7 @@ func join_params(query_params url.Values) string {
 }
 
 
-func get_upstream_url(url_path string, query_params url.Values) GalaxyResponse {
+func get_upstream_url(rhost string, url_path string, query_params url.Values) GalaxyResponse {
 
     /*****************************************************
      *  Get a request from cache or forward to upstream 
@@ -131,7 +131,7 @@ func get_upstream_url(url_path string, query_params url.Values) GalaxyResponse {
     // munge the body and headers
     body, _ := ioutil.ReadAll(uresp.Body)
     sb1 := string(body)
-    sb := strings.Replace(sb1, "https://galaxy.ansible.com", "", -1)
+    sb := strings.Replace(sb1, "https://galaxy.ansible.com", rhost, -1)
     jsonStr, _ := json.Marshal(uresp.Header)
     sj := string(jsonStr)
 
@@ -172,9 +172,16 @@ func (g *GalaxyProxy) UpstreamHandler(c *gin.Context) {
      * Handle api/v1/roles/*
      ************************************/
 
+    // get the request host ...
+    scheme := "http"
+    if c.Request.TLS != nil {
+        scheme = "https"
+    }
+    rhost := scheme + "://" + c.Request.Host
+
     // get the upstream response ...
 	url_path := c.Request.URL.Path
-	uresp := get_upstream_url(url_path, c.Request.URL.Query())
+	uresp := get_upstream_url(rhost, url_path, c.Request.URL.Query())
 
     // set response headers ...
     var headers map[string]string
