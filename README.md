@@ -21,7 +21,7 @@ Each cached response will live in the /data directory on the container.
 Golang
 ------
 
-1. cd python
+1. cd golang
 2. docker build -t galaxy-proxy:latest .
 3. docker run galaxy-proxy:latest
 
